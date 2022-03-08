@@ -10,12 +10,16 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // Normalized pixel coordinates (from 0 to 1)
     vec2 uv = fragCoord/iResolution.xy;
     vec3 currentColor = vec3(0.0, 0.0, 0.0);
-    vec3 tagColor = texture(iChannel0, vec2(uv.x, uv.y)).rgb;
-    if(fragCoord.x <50.0) {
-        if(fragCoord.y > 210.0 && fragCoord.y < 230.0){
-           currentColor = tagColor;
-        }
+    ivec2 size = textureSize(iChannel0, 4).xy;
+    if(fragCoord.x < float(size.x) / 2.0) {
+        currentColor = vec3(0.0, 1.0, 0.0);
     }
+    // vec3 tagColor = texture(iChannel0, vec2(uv.x, uv.y)).rgb;
+    // if(fragCoord.x <50.0) {
+    //     if(fragCoord.y > 210.0 && fragCoord.y < 230.0){
+    //        currentColor = tagColor;
+    //     }
+    // }
 
     fragColor = vec4(currentColor, 0.0);
 }
