@@ -1,91 +1,42 @@
 // #iChannel0 "file://Users/chenyingchao/vscode/拜年/date_spec.png"
 // #iChannel1 "file://Users/chenyingchao/vscode/三格/for_test.jpeg"
 
-//#iChannel0 "./0.glsl"
-//#iChannel1 "./filter-calendar_spec.png"
-#iChannel1 "./123.JPEG.webp"
-#iChannel0 "./date_spec.png"
+#iChannel0 "./cat.jpg" 
+#iChannel1 "./frame.png"
+#iChannel2 "./date.png"
 
-const vec2 TextureSize = vec2(800.0, 3139.0);
+#include "./bin/rect.glsl"
+#include "./bin/blend/blend.glsl"
 
-float maxSide (vec2 size) {
-   if(size.x > size.y) {
-      return size.x;
-   }
-   return size.y;
-}
 
-vec4 cutoffColor(vec2 fragCoord) {
+vec2 borderSize = vec2(1000.0, 1500.0);
+vec2 dateSize = vec2(800.0, 3100.0);
+vec2 imageSize = vec2(3024.0, 4032.0);
 
- // Normalized pixel coordinates (from 0 to 1)
-    vec2 uv = fragCoord/iResolution.xy;
-    vec4 currentColor = vec4(0.0, 0.0, 0.0, 0.0);
-    vec4 tagColor = vec4(texture(iChannel0, vec2(uv.x, uv.y)).rgb, 0.0);
-    if(fragCoord.x < 50.0) {
-        if(fragCoord.y > 210.0 && fragCoord.y < 230.0){
-           currentColor = tagColor;
-        }
-    }
 
-    return currentColor;
-}
+float imageLeft = 50.0;
+float imageTop = 50.0;
+float imageBottom = 100.0;
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
-{
-    // Normalized pixel coordinates (from 0 to 1)
+void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
+ 
     vec2 uv = fragCoord/iResolution.xy;
 
-    vec4 bgColor = vec4(0.8588, 0.0706, 0.2314, 1.0);
-    vec4 currentColor = bgColor;
+    vec4 currentColor = vec4(0.7333, 0.0706, 0.0706, 1.0);
+    currentColor = blend(currentColor, texture(iChannel1, uv));
    
-    float inset_top = 30.0;
-    float inset_left = 10.0;          
-    float inset_bottom = 30.0;
-    float inset_right = 10.0;
+    
+    highp vec4 rect = vec4(0, 0, iResolution.xy);
 
-    float inset_top1 = 100.0;
-    float inset_left1 = 50.0;          
-    float inset_bottom1 = 100.0;
-    float inset_right1 = 50.0;
+    highp vec4 imageRect = vec4(imageLeft, imageBottom, iResolution.x - 2.0 * imageLeft, iResolution.y - imageTop - imageBottom);
+    
+    vec4 picRect = vec4(imageLeft/iResolution.x, imageBottom/iResolution.y, 1.0 - imageLeft/iResolution.x*2.0,  1. - imageTop / iResolution.y - imageBottom / iResolution.y);
 
-    if ((fragCoord.x > inset_left && fragCoord.x < iResolution.x - inset_left) && (fragCoord.y > inset_top && fragCoord.y < iResolution.y - inset_bottom)) {
-       currentColor = vec4(1, 1, 1, 1);
-    }
+    float picRatioX = (iResolution.x - imageLeft * 2.) / imageSize.x;
+    float picRatioY = (iResolution.y - imageTop - imageBottom) / imageSize.y;
+    //  图片位置
+    vec2 picCoord = vec2(uv.x / picRatioX , uv.y / picRatioY);
 
-    vec4 imageColor = vec4(texture(iChannel1, vec2(uv.x, uv.y)).rgb, 1.0);
-   
-
-    if ((fragCoord.x > inset_left1 && fragCoord.x < iResolution.x - inset_left1) && (fragCoord.y > inset_top1 && fragCoord.y < iResolution.y - inset_bottom1)) {
-       currentColor = imageColor;
-    }
-           
-      float maxScale = maxSide(TextureSize);  
-
-      float maxScale1 = maxSide(vec2(iResolution.x, iResolution.y));
-
-      float scale = maxScale / maxScale1;
-
-      if(fragCoord.x > 100.0 && fragCoord.x < 150.0 && fragCoord.y > 50.0 && fragCoord.y < 100.0) {
-           
-            //x: 0----50   y:210----230    
-            //x: 100---150 y:50---100
-            float s = iResolution.x/TextureSize.x;
-            float s1 = iResolution.y/TextureSize.y;
-            float x = fragCoord.x - 100.0 * s;//fragCoord.x * s;
-            float y = fragCoord.y + 160.0 / s1;  //fragCoord.y / s1;
-            vec2 uv1 = vec2(x, y)/TextureSize.xy;
-            vec4 tagColor = vec4(texture(iChannel0, vec2(uv1.x, uv1.y)).rgb, 0.0);
-            currentColor = tagColor;
-
-      }
-
-      // vec4 cutoffColor = cutoffColor(fragCoord);
-      // if(fragCoord.x <50.0) {
-      //   if(fragCoord.y > 210.0 && fragCoord.y < 230.0){
-      //      currentColor = cutoffColor;
-      //   }
-      // }
-      
-
+   currentColor = texture(iChannel0, picCoord);
     fragColor = currentColor;
 }
